@@ -1,0 +1,1671 @@
+@(territoryData: Map[Int, Territory], playerData: List[Map[String, Any]], adjacentMap: Map[Int, List[Int]])
+@defining(play.core.PlayVersion.current) { version =>
+
+    <html lang="en">
+
+        <head>
+
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="description" content="">
+            <meta name="author" content="">
+
+            <title>RiskGT</title>
+
+                <!-- Bootstrap Core CSS -->
+            <link href="@routes.Assets.versioned("static/main/vendor/bootstrap/css/bootstrap.min.css")" rel="stylesheet">
+
+                <!-- MetisMenu CSS -->
+            <link href="@routes.Assets.versioned("static/main/vendor/metisMenu/metisMenu.min.css")" rel="stylesheet">
+
+                <!-- Custom CSS -->
+            <link href="@routes.Assets.versioned("static/main/dist/css/sb-admin-2.css")" rel="stylesheet">
+
+                <!-- Custom Fonts -->
+            <link href="@routes.Assets.versioned("static/main/vendor/font-awesome/css/font-awesome.min.css")" rel="stylesheet" type="text/css">
+
+                <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+                <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+        </head>
+
+        <body>
+
+            <div id="wrapper">
+                    <!-- Navigation -->
+                <nav id="nav" class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;
+                    z-index: 0">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="../../../">RiskGT</a>
+                    </div>
+                        <!-- /.navbar-header -->
+
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user">
+                                <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                                </li>
+                                <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li><a href="#"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                                </li>
+                            </ul>
+                                <!-- /.dropdown-user -->
+                        </li>
+                            <!-- /.dropdown -->
+                    </ul>
+                        <!-- /.navbar-top-links -->
+
+                    <div class="navbar-default sidebar" role="navigation">
+                        <div class="sidebar-nav navbar-collapse">
+                            <ul class="nav" id="side-menu">
+                                <li>
+                                    <a href="#"><i class="fa fa-dashboard fa-fw"></i>
+                                        Dashboard</a>
+                                </li>
+                                <li>
+                                    <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i>
+                                        Sessions<span class="fa arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="#">All</a>
+                                        </li>
+                                    </ul>
+                                        <!-- /.nav-second-level -->
+                                </li>
+                                <li>
+                                    <a href="#"><i class="fa fa-table fa-fw"></i> Account</a>
+                                </li>
+                            </ul>
+                        </div>
+                            <!-- /.sidebar-collapse -->
+                        <div class="panel-heading" style="display:none" id="attackRoll">
+                             Attacker's Dice Rolls: <span class="pull-right"><em id="attackRollNum">
+                                 N/A</em>
+                             </span>
+                        </div>
+                        <div class="panel-heading" style="display:none" id="defendRoll">
+                            Defender's Dice Rolls: <span class="pull-right"><em id="defendRollNum">
+                                N/A</em>
+                            </span>
+                        </div>
+
+                        <div class="buttoncontainer2" style="text-align: center; position: relative; top: 20px">
+                            <button id="cancel2" style="display:none" onclick="cancelAttack()">Cancel Attack</button>
+                            <button id="proceed2" style="display:none" onclick="attack(parseInt(document.getElementById('attackingTerr').innerText),
+                                    parseInt(document.getElementById('defendingTerr').innerText),
+                                    parseInt(document.getElementById('atkInput').options[document.getElementById('atkInput').selectedIndex].text),
+                                    parseInt(document.getElementById('atkInput').options[document.getElementById('defInput').selectedIndex].text))">Continue Attack?
+                            </button>
+                        </div>
+
+
+                    </div>
+                        <!-- /.navbar-static-side -->
+                </nav>
+                    <!-- Page Content -->
+                <div id="page-wrapper">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <i class="fa fa-bar-chart-o fa-fw"></i> Players Active : @playerData.size
+                                </div>
+                                    <!-- /.panel-heading -->
+                                <div class="panel-body">
+                                    <script>
+
+
+                                    </script>
+                                    <div id = "MapImage">
+                                    <img src="@routes.Assets.versioned("images/map.png")" alt="Game Map" height = "500" width = "700" usemap="#Territories" style="position: relative; right: 120px"
+                                        class = "Map" onload="reloadSpots()">
+                                    <map name = "Territories">
+                                        <area name = "1" shape = "poly" coords="268, 62, 321, 61,321, 80,296, 83, 296 156,264, 110, 268, 62"
+                                        onclick="getData(1); showBorder(1)" id="t1">
+                                        <area name = "2" shape = "poly" coords="324, 61, 324, 81, 365, 81, 348, 60, 324, 61"
+                                        onclick="getData(2); showBorder(2)" id="t2">
+                                        <area name = "3" shape = "poly" coords="302,88, 345, 88, 345, 110, 301, 110, 302, 88"
+                                        onclick="getData(3); showBorder(3)" id="t3">
+                                        <area name = "4" shape = "poly" coords="351, 87,367, 87, 388, 109, 352, 109, 351, 87"
+                                        onclick="getData(4); showBorder(4)" id="t4">
+                                        <area name = "5" shape = "poly" coords="301, 116, 345, 116, 345, 136, 300, 136, 301, 116"
+                                        onclick="getData(5); showBorder(5)" id="t5">
+                                        <area name = "6" shape = "poly" coords="300, 142, 343, 141, 344, 179, 323, 178, 323, 167, 302, 166, 300, 142"
+                                        onclick="getData(6); showBorder(6)" id="t6">
+                                        <area name = "7" shape = "poly" coords="349, 115, 349, 177, 394, 177, 420, 144, 391, 115, 349, 115"
+                                        onclick="getData(7); showBorder(7)" id="t7">
+                                        <area name = "8" shape = "poly" coords="353, 40, 382, 39, 394, 60, 398, 83, 372, 83, 353, 62, 353, 40"
+                                        onclick="getData(8); showBorder(8)" id="t8">
+                                        <area name = "9" shape = "poly" coords="401, 27, 455, 27, 455, 93, 434, 110, 410, 110, 403, 116, 373, 88, 402, 88, 401, 27"
+                                        onclick="getData(9); showBorder(9)" id="t9">
+                                        <area name = "10" shape = "poly" coords="402, 120, 414, 114, 455, 114, 457, 142, 424, 144, 402, 110"
+                                        onclick="getData(10); showBorder(10)" id="t10">
+                                        <area name = "11" shape = "poly" coords="459, 61, 475, 61, 475, 149, 460, 146, 459, 61"
+                                        onclick="getData(11); showBorder(11)" id="t11">
+                                        <area name = "12" shape = "poly" coords="480, 61, 512, 61, 514, 85, 480, 85, 480, 61"
+                                        onclick="getData(12); showBorder(12)" id="t12">
+                                        <area name = "13" shape = "poly" coords="483, 90, 513, 90, 513, 148, 482, 149, 483, 90"
+                                        onclick="getData(13); showBorder(13)" id="t13">
+                                        <area name = "14" shape = "poly" coords="530, 5, 530, 55, 556, 56, 554, 5, 530, 5"
+                                        onclick="getData(14); showBorder(14)" id="t14">
+                                        <area name = "15" shape = "poly" coords="561, 2,560, 56, 599, 57,599, 23, 589, 16, 587, 1, 561, 2"
+                                        onclick="getData(15); showBorder(15)" id="t15">
+                                        <area name = "16" shape = "poly" coords="519, 61, 618, 61, 618, 188,570, 170, 551, 152, 551, 126, 545, 112, 517, 112, 519, 61"
+                                        onclick="getData(16); showBorder(16)" id="t16">
+                                        <area name = "17" shape = "poly" coords="515, 116, 545, 116, 551, 127, 550, 153, 515, 150, 515, 116"
+                                        onclick="getData(17); showBorder(17)" id="t17">
+                                        <area name = "18" shape = "poly" coords="624, 60, 680, 60, 685, 188, 663, 188, 663, 153, 624, 151, 624, 60"
+                                        onclick="getData(18); showBorder(18)" id="t18">
+                                        <area name = "19" shape = "poly" coords="624, 157, 658, 157, 658, 187, 624, 188, 624, 157"
+                                        onclick="getData(19); showBorder(19)" id="t19">
+                                        <area name = "20" shape = "poly" coords="624, 192, 658, 192, 661, 233, 625, 216, 624, 192"
+                                        onclick="getData(20); showBorder(20)" id="t20">
+                                        <area name = "21" shape = "poly" coords="664, 193, 685, 194, 692, 230, 668, 230, 664, 193"
+                                        onclick="getData(21); showBorder(21)" id="t21">
+                                        <area name = "22" shape = "poly" coords="300, 169, 319, 172, 319, 182, 392, 182, 392, 265, 385, 274, 299, 197, 300, 169"
+                                        onclick="getData(22); showBorder(22)" id="t22">
+                                        <area name = "23" shape = "poly" coords="280, 219, 293, 207, 318, 230, 296, 252, 280, 219"
+                                        onclick="getData(23); showBorder(23)" id="t23">
+                                        <area name = "24" shape = "poly" coords="299, 255, 319, 237, 356, 269, 246, 285, 299, 255"
+                                        onclick="getData(24); showBorder(24)" id="t24">
+                                        <area name = "25" shape = "poly" coords="351, 286, 362, 272, 378, 282, 371, 295, 351, 286"
+                                        onclick="getData(25); showBorder(25)" id="t25">
+                                        <area name = "26" shape = "poly" coords="383, 283, 444, 301, 416, 320, 378, 296, 383, 283"
+                                        onclick="getData(26); showBorder(26)" id="t26">
+                                        <area name = "27" shape = "poly" coords="283, 336, 294, 324, 349, 342, 400, 347, 438, 367, 407, 380, 352, 379, 283, 336"
+                                        onclick="getData(27); showBorder(27)" id="t27">
+                                        <area name = "28" shape = "poly" coords="423, 323, 452, 302, 475, 306, 478, 349, 456, 358, 423, 323"
+                                        onclick="getData(28); showBorder(28)" id="t28">
+                                        <area name = "29" shape = "poly" coords="481, 305, 526, 318, 545, 344, 483, 346, 482, 303"
+                                        onclick="getData(29); showBorder(29)" id="t29">
+                                        <area name = "30" shape = "poly" coords="397, 178, 425, 150, 440, 146, 474, 164, 470, 167, 470, 207, 476, 212, 436, 216, 420, 186, 397, 178"
+                                        onclick="getData(30); showBorder(30)" id="t30">
+                                        <area name = "31" shape = "poly" coords="397, 180, 419, 190, 437, 218, 437, 225, 454, 249, 402, 250, 391, 238, 397, 180"
+                                        onclick="getData(31); showBorder(31)" id="t31">
+                                        <area name = "32" shape = "poly" coords="401, 251, 476, 258, 475, 291, 521, 303, 476, 297, 390, 275, 393, 258, 401, 251"
+                                        onclick="getData(32); showBorder(32)" id="t32">
+                                        <area name = "33" shape = "poly" coords="477, 153, 510, 154, 510, 234, 479, 256, 457, 249, 438, 219, 452, 213, 477, 213, 477, 153"
+                                        onclick="getData(33); showBorder(33)" id="t33">
+                                        <area name = "34" shape = "poly" coords="513, 238, 478, 260, 479, 288, 525, 301, 544, 318, 572, 318, 570, 276, 513, 273, 513, 238"
+                                        onclick="getData(34); showBorder(34)" id="t34">
+                                        <area name = "35" shape = "poly" coords="515, 154, 515, 234, 541, 245, 580, 229, 606, 217, 620, 215, 618, 191, 584, 192, 563, 168, 543, 153, 515, 154"
+                                        onclick="getData(35); showBorder(35)" id="t35">
+                                        <area name = "36" shape = "poly" coords="514, 240, 530, 241, 538, 248, 534, 255, 533, 271, 514, 271, 514, 240"
+                                        onclick="getData(36); showBorder(36)" id="t36">
+                                        <area name = "37" shape = "poly" coords="537, 269, 542, 249, 570, 239, 602, 222, 606, 231, 594, 236, 594, 251, 601, 272, 585, 274, 586, 298, 576, 298, 566, 271, 537, 269"
+                                        onclick="getData(37); showBorder(37)" id="t37">
+                                        <area name = "38" shape = "poly" coords="607, 221, 641, 225, 661, 246, 662, 274, 604, 272, 607, 221"
+                                        onclick="getData(38); showBorder(38)" id="t38">
+                                        <area name = "39" shape = "poly" coords="590, 277, 660, 278, 661, 349, 638, 349, 638, 369, 599, 369, 576, 344, 559, 347, 544, 323, 576, 323, 575, 308, 590, 298, 590, 277"
+                                        onclick="getData(39); showBorder(39)" id="t39">
+                                        <area name = "40" shape = "poly" coords="667, 233, 693, 234, 699, 275, 657, 273, 667, 233"
+                                        onclick="getData(40); showBorder(40)" id="t40">
+                                        <area name = "41" shape = "poly" coords="666, 279, 695, 280, 695, 346, 666, 346, 666, 279"
+                                        onclick="getData(41); showBorder(41)" id="t41">
+                                        <area name = "oof" shape = "poly" coords="663, 353, 698, 353, 697, 430, 668, 431, 663, 421, 663, 353"
+                                        onclick="getData(42); showBorder(42)" id="t42">
+                                    </map>
+                                        @*Territory possession circles*@
+                                        <div id ="T1"></div> <div id ="T2"></div> <div id ="T3"></div> <div id ="T4"></div> <div id ="T5"></div>
+                                        <div id ="T6"></div> <div id ="T7"></div> <div id ="T8"></div> <div id ="T9"></div> <div id ="T10"></div>
+                                        <div id ="T11"></div> <div id ="T12"></div> <div id ="T13"></div> <div id ="T14"></div> <div id ="T15"></div>
+                                        <div id ="T16"></div> <div id ="T17"></div> <div id ="T18"></div> <div id ="T19"></div> <div id ="T20"></div>
+                                        <div id ="T21"></div> <div id ="T22"></div> <div id ="T23"></div> <div id ="T24"></div> <div id ="T25"></div>
+                                        <div id ="T26"></div> <div id ="T27"></div> <div id ="T28"></div> <div id ="T29"></div> <div id ="T30"></div>
+                                        <div id ="T31"></div> <div id ="T32"></div> <div id ="T33"></div> <div id ="T34"></div> <div id ="T35"></div>
+                                        <div id ="T36"></div> <div id ="T37"></div> <div id ="T38"></div> <div id ="T39"></div> <div id ="T40"></div>
+                                        <div id ="T41"></div> <div id ="T42"></div>
+                                        <script>
+                                                function hideBorders() {
+                                                    for (var i = 1; i < 43; i++) {
+                                                        var img = document.getElementById(i.toString());
+                                                        img.style.display = 'none';
+                                                    }
+                                                }
+                                                function showBorder(num) {
+                                                    for (var i = 1; i < 43; i++) {
+                                                        if (i != num) {
+                                                            var img = document.getElementById(i.toString());
+                                                            img.style.display = 'none';
+                                                        } else {
+                                                            var img = document.getElementById(num.toString());
+                                                            img.style.display = 'inline';
+                                                        }
+                                                    }
+                                                }
+                                        </script>
+
+                                        @*Selected outlines*@
+                                        <div id ="B1"><img src="@routes.Assets.versioned("images/1.png")" height="100" width="60px" id="1" onload="hideBorders();"></div>
+                                        <div id ="B2"><img src="@routes.Assets.versioned("images/2.png")" height="25" width="44px" id="2" onload="reloadSpots()"></div>
+                                        <div id ="B3"><img src="@routes.Assets.versioned("images/3.png")" height="25" width="49px" id="3"></div>
+                                        <div id ="B4"><img src="@routes.Assets.versioned("images/4.png")" height="25" width="40px" id="4"></div>
+                                        <div id ="B5"><img src="@routes.Assets.versioned("images/5.png")" height="27" width="49px" id="5"></div>
+                                        <div id ="B6"><img src="@routes.Assets.versioned("images/6.png")" height="39" width="48px" id="6"></div>
+                                        <div id ="B7"><img src="@routes.Assets.versioned("images/7.png")" height="69" width="71px" id="7"></div>
+                                        <div id ="B8"><img src="@routes.Assets.versioned("images/8.png")" height="47" width="50px" id="8"></div>
+                                        <div id ="B9"><img src="@routes.Assets.versioned("images/9.png")" height="91" width="85px" id="9"></div>
+                                        <div id ="B10"><img src="@routes.Assets.versioned("images/10.png")" height="39" width="56px" id="10"></div>
+                                        <div id ="B11"><img src="@routes.Assets.versioned("images/11.png")" height="89" width="19px" id="11"></div>
+                                        <div id ="B12"><img src="@routes.Assets.versioned("images/12.png")" height="26" width="34px" id="12"></div>
+                                        <div id ="B13"><img src="@routes.Assets.versioned("images/13.png")" height="62" width="35px" id="13"></div>
+                                        <div id ="B14"><img src="@routes.Assets.versioned("images/14.png")" height="54" width="30px" id="14"></div>
+                                        <div id ="B15"><img src="@routes.Assets.versioned("images/15.png")" height="56" width="46" id="15"></div>
+                                        <div id ="B16"><img src="@routes.Assets.versioned("images/16.png")" height="129" width="105" id="16"></div>
+                                        <div id ="B17"><img src="@routes.Assets.versioned("images/17.png")" height="40" width="40" id="17"></div>
+                                        <div id ="B18"><img src="@routes.Assets.versioned("images/18.png")" height="130" width="65" id="18"></div>
+                                        <div id ="B19"><img src="@routes.Assets.versioned("images/19.png")" height="33" width="39" id="19"></div>
+                                        <div id ="B20"><img src="@routes.Assets.versioned("images/20.png")" height="43" width="42" id="20"></div>
+                                        <div id ="B21"><img src="@routes.Assets.versioned("images/21.png")" height="40" width="32" id="21"></div>
+                                        <div id ="B22"><img src="@routes.Assets.versioned("images/22.png")" height="107" width="99" id="22"></div>
+                                        <div id ="B23"><img src="@routes.Assets.versioned("images/23.png")" height="49" width="45" id="23"></div>
+                                        <div id ="B24"><img src="@routes.Assets.versioned("images/24.png")" height="51" width="63" id="24"></div>
+                                        <div id ="B25"><img src="@routes.Assets.versioned("images/25.png")" height="29" width="30" id="25"></div>
+                                        <div id ="B26"><img src="@routes.Assets.versioned("images/26.png")" height="41" width="72" id="26"></div>
+                                        <div id ="B27"><img src="@routes.Assets.versioned("images/27.png")" height="64" width="160" id="27"></div>
+                                        <div id ="B28"><img src="@routes.Assets.versioned("images/28.png")" height="61" width="59" id="28"></div>
+                                        <div id ="B29"><img src="@routes.Assets.versioned("images/29.png")" height="47" width="68" id="29"></div>
+                                        <div id ="B30"><img src="@routes.Assets.versioned("images/30.png")" height="74" width="83" id="30"></div>
+                                        <div id ="B31"><img src="@routes.Assets.versioned("images/31.png")" height="75" width="66" id="31"></div>
+                                        <div id ="B32"><img src="@routes.Assets.versioned("images/32.png")" height="61" width="137" id="32"></div>
+                                        <div id ="B33"><img src="@routes.Assets.versioned("images/33.png")" height="106" width="79" id="33"></div>
+                                        <div id ="B34"><img src="@routes.Assets.versioned("images/34.png")" height="82" width="97" id="34"></div>
+                                        <div id ="B35"><img src="@routes.Assets.versioned("images/35.png")" height="93" width="107" id="35"></div>
+                                        <div id ="B36"><img src="@routes.Assets.versioned("images/36.png")" height="34" width="27" id="36"></div>
+                                        <div id ="B37"><img src="@routes.Assets.versioned("images/37.png")" height="79" width="71" id="37"></div>
+                                        <div id ="B38"><img src="@routes.Assets.versioned("images/38.png")" height="56" width="64" id="38"></div>
+                                        <div id ="B39"><img src="@routes.Assets.versioned("images/39.png")" height="94" width="121" id="39"></div>
+                                        <div id ="B40"><img src="@routes.Assets.versioned("images/40.png")" height="43" width="33" id="40"></div>
+                                        <div id ="B41"><img src="@routes.Assets.versioned("images/41.png")" height="71" width="32" id="41"></div>
+                                        <div id ="B42"><img src="@routes.Assets.versioned("images/42.png")" height="80" width="37" id="42" onload="reloadSpots();"></div>
+
+
+                                    </div>
+                                    @*Feel free to collapse these 700+ lines of style*@
+                                    <style>
+                                        #B1 {
+                                            position: absolute;
+                                            top: 58px;
+                                            left: 145px;
+                                            pointer-events: none
+                                        }
+                                        #B2 {
+                                            position: absolute;
+                                            top: 58px;
+                                            left: 202px;
+                                            pointer-events: none
+                                        }
+                                        #B3 {
+                                            position: absolute;
+                                            top: 86px;
+                                            left: 180px;
+                                            pointer-events: none
+                                        }
+                                        #B4 {
+                                            position: absolute;
+                                            top: 86px;
+                                            left: 230px;
+                                            pointer-events: none
+                                        }
+                                        #B5 {
+                                            position: absolute;
+                                            top: 111px;
+                                            left: 179px;
+                                            pointer-events: none
+                                        }
+                                        #B6 {
+                                            position: absolute;
+                                            top: 140px;
+                                            left: 179px;
+                                            pointer-events: none
+                                        }
+                                        #B7 {
+                                            position: absolute;
+                                            top: 111px;
+                                            left: 228px;
+                                            pointer-events: none
+                                        }
+                                        #B8 {
+                                            position: absolute;
+                                            top: 37px;
+                                            left: 230px;
+                                            pointer-events: none
+                                        }
+                                        #B9 {
+                                            position: absolute;
+                                            top: 25px;
+                                            left: 253px;
+                                            pointer-events: none
+                                        }
+                                        #B10 {
+                                            position: absolute;
+                                            top: 106px;
+                                            left: 282px;
+                                            pointer-events: none
+                                        }
+                                        #B11 {
+                                            position: absolute;
+                                            top: 59px;
+                                            left: 339px;
+                                            pointer-events: none
+                                        }
+                                        #B12 {
+                                             position: absolute;
+                                             top: 59px;
+                                             left: 361px;
+                                            pointer-events: none
+                                         }
+                                        #B13 {
+                                            position: absolute;
+                                            top: 87px;
+                                            left: 361px;
+                                            pointer-events: none
+                                        }
+                                        #B14 {
+                                             position: absolute;
+                                             top: 2px;
+                                             left: 409px;
+                                             pointer-events: none
+                                         }
+                                        #B15 {
+                                            position: absolute;
+                                            top: 0px;
+                                            left: 434px;
+                                            pointer-events: none
+                                        }
+                                        #B16 {
+                                            position: absolute;
+                                            top: 58px;
+                                            left: 397px;
+                                            pointer-events: none
+                                        }
+                                        #B17 {
+                                            position: absolute;
+                                            top: 113px;
+                                            left: 393px;
+                                            pointer-events: none
+                                        }
+                                        #B18 {
+                                            position: absolute;
+                                            top: 58px;
+                                            left: 503px;
+                                            pointer-events: none
+                                        }
+                                        #B19 {
+                                            position: absolute;
+                                            top: 154px;
+                                            left: 503px;
+                                            pointer-events: none
+                                        }
+                                        #B20 {
+                                             position: absolute;
+                                             top: 190px;
+                                             left: 503px;
+                                            pointer-events: none
+                                         }
+                                        #B21 {
+                                            position: absolute;
+                                            top: 191px;
+                                            left: 543px;
+                                            pointer-events: none
+                                        }
+                                        #B22 {
+                                            position: absolute;
+                                            top: 166px;
+                                            left: 176px;
+                                            pointer-events: none
+                                        }
+                                        #B23 {
+                                            position: absolute;
+                                            top: 204px;
+                                            left: 156px;
+                                            pointer-events: none
+                                        }
+                                        #B24 {
+                                            position: absolute;
+                                            top: 234px;
+                                            left: 176px;
+                                            pointer-events: none
+                                        }
+                                        #B25 {
+                                            position: absolute;
+                                            top: 267px;
+                                            left: 230px;
+                                            pointer-events: none
+                                        }
+                                        #B26 {
+                                            position: absolute;
+                                            top: 280px;
+                                            left: 255px;
+                                            pointer-events: none
+                                        }
+                                        #B27 {
+                                            position: absolute;
+                                            top: 319px;
+                                            left: 160px;
+                                            pointer-events: none
+                                        }
+                                        #B28 {
+                                            position: absolute;
+                                            top: 298px;
+                                            left: 301px;
+                                            pointer-events: none
+                                        }
+                                        #B29 {
+                                            position: absolute;
+                                            top: 302px;
+                                            left: 360px;
+                                            pointer-events: none
+                                        }
+                                        #B30 {
+                                            position: absolute;
+                                            top: 143px;
+                                            left: 275px;
+                                            pointer-events: none
+                                        }
+                                        #B31 {
+                                            position: absolute;
+                                            top: 176px;
+                                            left: 271px;
+                                            pointer-events: none
+                                        }
+                                        #B32 {
+                                            position: absolute;
+                                            top: 245px;
+                                            left: 268px;
+                                            pointer-events: none
+                                        }
+                                        #B33 {
+                                            position: absolute;
+                                            top: 150px;
+                                            left: 316px;
+                                            pointer-events: none
+                                        }
+                                        #B34 {
+                                             position: absolute;
+                                             top: 236px;
+                                             left: 356px;
+                                             pointer-events: none
+                                         }
+                                        #B35 {
+                                            position: absolute;
+                                            top: 151px;
+                                            left: 394px;
+                                            pointer-events: none
+                                        }
+                                        #B36 {
+                                            position: absolute;
+                                            top: 238px;
+                                            left: 394px;
+                                            pointer-events: none
+                                        }
+                                        #B37 {
+                                            position: absolute;
+                                            top: 220px;
+                                            left: 417px;
+                                            pointer-events: none
+                                        }
+                                        #B38 {
+                                            position: absolute;
+                                            top: 217px;
+                                            left: 480px;
+                                            pointer-events: none
+                                        }
+                                        #B39 {
+                                            position: absolute;
+                                            top: 275px;
+                                            left: 423px;
+                                            pointer-events: none
+                                        }
+                                        #B40 {
+                                            position: absolute;
+                                            top: 232px;
+                                            left: 547px;
+                                            pointer-events: none
+                                        }
+                                        #B41 {
+                                            position: absolute;
+                                            top: 276px;
+                                            left: 546px;
+                                            pointer-events: none
+                                        }
+                                        #B42 {
+                                            position: absolute;
+                                            top: 350px;
+                                            left: 543px;
+                                            pointer-events: none
+                                        }
+                                        :root {
+                                            --player1Color: green; --player2Color: green;  --player3Color: green;
+                                            --player4Color: green; --player5Color: green; --player6Color: green;  --player7Color: green;
+                                            --player8Color: green; --player9Color: green; --player10Color: green;  --player11Color: green;
+                                            --player12Color: green; --player13Color: green; --player14Color: green;  --player15Color: green;
+                                            --player16Color: green; --player17Color: green; --player18Color: green;  --player19Color: green;
+                                            --player20Color: green; --player21Color: green; --player22Color: green;  --player23Color: green;
+                                            --player24Color: green; --player25Color: green; --player26Color: green;  --player27Color: green;
+                                            --player28Color: green; --player29Color: green; --player30Color: green;  --player31Color: green;
+                                            --player32Color: green; --player33Color: green; --player34Color: green;  --player35Color: green;
+                                            --player36Color: green; --player37Color: green; --player38Color: green;  --player39Color: green;
+                                            --player40Color: green; --player41Color: green; --player42Color: green;
+                                        }
+
+                                        #MapImage {
+                                            position: relative;
+                                            height: 500px;
+                                            width: 700px;
+                                        }
+                                            #T1 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 155px;
+                                                top: 70px;
+                                                background-color: var(--player1Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T2 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 215px;
+                                                top: 65px;
+                                                background: var(--player2Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T3 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 195px;
+                                                top: 92px;
+                                                background: var(--player3Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T4 {
+                                                width: 10px;
+                                                height: 10px;
+                                                position: absolute;
+                                                left: 237px;
+                                                top: 91px;
+                                                background: var(--player4Color);
+                                                -webkit-border-radius: 5px;
+                                                -moz-border-radius: 5px;
+                                                border-radius: 5px;
+                                                border: 1px solid black;
+                                            } #T5 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 188px;
+                                                top: 117px;
+                                                background: var(--player5Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T6 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 199px;
+                                                top: 149px;
+                                                background: var(--player6Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T7 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 255px;
+                                                top: 130px;
+                                                background: var(--player7Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T8 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 241px;
+                                                top: 47px;
+                                                background: var(--player8Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T9 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 285px;
+                                                top: 30px;
+                                                background: var(--player9Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T10 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 309px;
+                                                top: 114px;
+                                                background: var(--player10Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T11 {
+                                                width: 10px;
+                                                height: 10px;
+                                                position: absolute;
+                                                left: 343px;
+                                                top: 70px;
+                                                background: var(--player11Color);
+                                                -webkit-border-radius: 5px;
+                                                -moz-border-radius: 5px;
+                                                border-radius: 5px;
+                                                border: 1px solid black;
+                                            } #T12 {
+                                                width: 10px;
+                                                height: 10px;
+                                                position: absolute;
+                                                left: 370px;
+                                                top: 65px;
+                                                background: var(--player12Color);
+                                                -webkit-border-radius: 5px;
+                                                -moz-border-radius: 5px;
+                                                border-radius: 5px;
+                                                border: 1px solid black;
+                                            } #T13 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 372px;
+                                                top: 120px;
+                                                background: var(--player13Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T14 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 416px;
+                                                top: 38px;
+                                                background: var(--player14Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T15 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 452px;
+                                                top: 38px;
+                                                background: var(--player15Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T16 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 423px;
+                                                top: 82px;
+                                                background: var(--player16Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            }  #T17 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 404px;
+                                                top: 128px;
+                                                background: var(--player17Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T18 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 526px;
+                                                top: 84px;
+                                                background: var(--player18Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T19 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 517px;
+                                                top: 168px;
+                                                background: var(--player19Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T20 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 511px;
+                                                top: 199px;
+                                                background: var(--player20Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T21 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 551px;
+                                                top: 214px;
+                                                background: var(--player21Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T22 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 228px;
+                                                top: 206px;
+                                                background: var(--player22Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T23 {
+                                                width: 11px;
+                                                height: 11px;
+                                                position: absolute;
+                                                left: 170px;
+                                                top: 224px;
+                                                background: var(--player23Color);
+                                                -webkit-border-radius: 5.5px;
+                                                -moz-border-radius: 5.5px;
+                                                border-radius: 5.5px;
+                                                border: 1px solid black;
+                                            } #T24 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 203px;
+                                                top: 256px;
+                                                background: var(--player24Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T25 {
+                                                width: 8px;
+                                                height: 8px;
+                                                position: absolute;
+                                                left: 240px;
+                                                top: 279px;
+                                                background: var(--player25Color);
+                                                -webkit-border-radius: 4px;
+                                                -moz-border-radius: 4px;
+                                                border-radius: 4px;
+                                                border: 1px solid black;
+                                            } #T26 {
+                                                width: 10px;
+                                                height: 10px;
+                                                position: absolute;
+                                                left: 286px;
+                                                top: 298px;
+                                                background: var(--player26Color);
+                                                -webkit-border-radius: 5px;
+                                                -moz-border-radius: 5px;
+                                                border-radius: 5px;
+                                                border: 1px solid black;
+                                            } #T27 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 246px;
+                                                top: 355px;
+                                                background: var(--player27Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T28 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 330px;
+                                                top: 326px;
+                                                background: var(--player28Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T29 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 383px;
+                                                top: 325px;
+                                                background: var(--player29Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T30 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 296px;
+                                                top: 160px;
+                                                background: var(--player30Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T31 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 287px;
+                                                top: 228px;
+                                                background: var(--player31Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T32 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 325px;
+                                                top: 265px;
+                                                background: var(--player32Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T33 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 370px;
+                                                top: 206px;
+                                                background: var(--player33Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T34 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 402px;
+                                                top: 282px;
+                                                background: var(--player34Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T35 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 433px;
+                                                top: 204px;
+                                                background: var(--player35Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T36 {
+                                                width: 8px;
+                                                height: 8px;
+                                                position: absolute;
+                                                left: 400px;
+                                                top: 255px;
+                                                background: var(--player36Color);
+                                                -webkit-border-radius: 4px;
+                                                -moz-border-radius: 4px;
+                                                border-radius: 4px;
+                                                border: 1px solid black;
+                                            } #T37 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 459px;
+                                                top: 255px;
+                                                background: var(--player37Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T38 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 502px;
+                                                top: 248px;
+                                                background: var(--player38Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T39 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 496px;
+                                                top: 318px;
+                                                background: var(--player39Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T40 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 556px;
+                                                top: 254px;
+                                                background: var(--player40Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T41 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 556px;
+                                                top: 310px;
+                                                background: var(--player41Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            } #T42 {
+                                                width: 12px;
+                                                height: 12px;
+                                                position: absolute;
+                                                left: 556px;
+                                                top: 387px;
+                                                background: var(--player42Color);
+                                                -webkit-border-radius: 6px;
+                                                -moz-border-radius: 6px;
+                                                border-radius: 6px;
+                                                border: 1px solid black;
+                                            }
+
+
+
+                                    </style>
+                                    <table id="player-data" class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">ID</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Email</th>
+                                                <th scope="col">Turn</th>
+                                                <th scope="col">Color</th>
+                                                <th scope="col">Number of Armies</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        @for(player <- playerData) {
+                                            <tr>
+                                                <th scope="col">@player("id")</th>
+                                                <td scope="col">@player("name")</td>
+                                                <td scope="col">@player("email")</td>
+                                                <td scope="col">@player("turn")</td>
+                                                <td scope="col">@player("color")</td>
+                                                <td scope="col">@player("numArmies")</td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                            <!-- /.panel-body -->
+                        <div class="col-lg-4">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <i class="fa fa-bell fa-fw"></i> Territory Information
+                                </div>
+                                    <!-- /.panel-heading -->
+                                <div class="panel-body">
+                                    <div class="list-group">
+                                        <a href="#" class="list-group-item">
+                                            <i class="fa fa-calendar-check-o fa-fw"></i>
+                                            Current Turn:
+                                            <span class="pull-right text-muted small"><em id="turn">
+                                                Player ID 1</em>
+                                            </span>
+                                        </a>
+                                        <a href="#" class="list-group-item">
+                                            <i class="fa fa-calendar-check-o fa-fw"></i>
+                                            Territory Number
+                                            <span class="pull-right text-muted small"><em id="terr_number">
+                                                N/A</em>
+                                            </span>
+                                        </a>
+                                        <a href="#" class="list-group-item">
+                                            <i class="fa fa-calendar-check-o fa-fw"></i>
+                                            Number of Armies
+                                            <span class="pull-right text-muted small"><em id="num_armies">
+                                                N/A</em>
+                                            </span>
+                                        </a>
+                                        <a href="#" class="list-group-item">
+                                            <i class="fa fa-male fa-fw"></i> Owner
+                                            <span class="pull-right text-muted small"><em id="owner">
+                                                GT</em>
+                                            </span>
+                                        </a>
+                                    </div>
+                                        <!-- /.list-group -->
+                                </div>
+                                    <!-- /.panel-body -->
+                                <a href="#" class="list-group-item" onclick="addArmies(1, parseInt(document.getElementById('terr_number').innerText))">
+                                     Add Army
+                                </a>
+                                <a href="#" class="list-group-item" onclick = "showAttack()">
+                                    Attack
+                                </a>
+                                <a href="#" class="list-group-item" onclick = "showFortify()">
+                                    Fortify
+                                </a>
+
+                            </div>
+                            <div class="panel-heading" id="selectAttack" style="display: none;">
+                                Select Territory to Attack From
+                                <div class="panel-body">
+                                <div class=list-group">
+                                    <a href="#" class="list-group-item" id="attackFrom" onclick="attackFrom()">
+                                        Attack From This Territory: #
+                                            <span class="pull-right text-muted small"><em id="attackingTerr">
+                                                N/A</em>
+                                            </span>
+                                    </a>
+                                    <a href="#" class="list-group-item" id = "defending" style="display: none;" onclick="attackTo()">
+                                        Attack This Territory: #
+                                        <span class="pull-right text-muted small"><em id="defendingTerr">
+                                            N/A</em>
+                                        </span>
+                                    </a>
+                                    <div class="form-inline" style="text-align: left; position: relative; top: 5px; display: none;"
+                                        id = "input">
+                                        <label for="atkInput">(Attacker's Choice) Number of Attacking Armies: </label>
+                                        <select type="text" href="#" class="form-group" id = "atkInput">
+                                            <option value="oneArmy">1</option>
+                                            <option value="twoArmy">2</option>
+                                            <option value="threeArmy">3</option>
+                                        </select>
+                                        <label for="defInput">(Defender's Choice) Number of Defending Armies: </label>
+                                        <select type="text" href="#" class="form-group" id = "defInput">
+                                            <option value="oneArmy">1</option>
+                                            <option value="twoArmy">2</option>
+                                        </select>
+                                    </div>
+                                    <div class="buttoncontainer" style="text-align: center; position: relative; top: 20px">
+                                        <button id="cancel" style="display:none" onclick="cancelAttack()">Cancel Attack</button>
+                                        <button id="proceed" style="display:none" onclick="attack(parseInt(document.getElementById('attackingTerr').innerText),
+                                                parseInt(document.getElementById('defendingTerr').innerText),
+                                                parseInt(document.getElementById('atkInput').options[document.getElementById('atkInput').selectedIndex].text),
+                                                parseInt(document.getElementById('atkInput').options[document.getElementById('defInput').selectedIndex].text))">Attack!
+                                        </button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            <div class="panel-heading" id="selectFortify" style="display: none;">
+                                Select Territory to Fortify
+                                <div class="panel-body">
+                                    <div class=list-group">
+                                        <a href="#" class="list-group-item" id="fortifyFrom" onclick="fortifyFrom()">
+                                            Fortify From This Territory: #
+                                            <span class="pull-right text-muted small"><em id="reinforcingTerr">
+                                                N/A</em>
+                                            </span>
+                                        </a>
+                                        <a href="#" class="list-group-item" id = "fortifyTo" style="display: none;" onclick="fortifyTo()">
+                                            Fortify This Territory: #
+                                            <span class="pull-right text-muted small"><em id="reinforceeTerr">
+                                                N/A</em>
+                                            </span>
+                                        </a>
+                                        <div class="form-inline" style="text-align: left; position: relative; top: 5px; display: none;"
+                                        id = "inputFort">
+                                            <form>
+                                                Number of Armies Reinforcing:
+                                                <label>
+                                                    <input type ="text" name ="reinforceCount" id="fortifyNum">
+                                                </label>
+                                            </form>
+                                        </div>
+                                        <div class="buttoncontainerFort" style="text-align: center; position: relative; top: 20px">
+                                            <button id="cancelFort" style="display:none" onclick="cancelFortify()">Cancel Fortification</button>
+                                            <button id="proceedFort" style="display:none" onclick="fortify(parseInt(document.getElementById('reinforcingTerr').innerText),
+                                                    parseInt(document.getElementById('reinforceeTerr').innerText),
+                                                    parseInt(document.getElementById('fortifyNum').value))">Fortify
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <!-- /.panel -->
+                            <button id="end-turn" class="btn btn-danger" style="display:none" onclick="endTurn()">End Turn</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+                <!-- /#page-wrapper -->
+
+            </div>
+                <!-- /#wrapper -->
+
+                <!-- jQuery -->
+            <script src="@routes.Assets.versioned("static/main/vendor/jquery/jquery.min.js")"></script>
+
+                <!-- Bootstrap Core JavaScript -->
+            <script src="@routes.Assets.versioned("static/main/vendor/bootstrap/js/bootstrap.min.js")"></script>
+
+                <!-- Metis Menu Plugin JavaScript -->
+            <script src="@routes.Assets.versioned("static/main/vendor/metisMenu/metisMenu.min.js")"></script>
+
+                <!-- Custom Theme JavaScript -->
+            <script src="@routes.Assets.versioned("static/main/dist/js/sb-admin-2.js")"></script>
+
+            <script>
+                function showAttack() {
+                  if(!initGame) {
+                          alert("Cannot attack before initial army placements!");
+                    } else {
+                        var attackWindow = document.getElementById("selectAttack");
+                        attackWindow.style.display = "inline";
+                        hideFortify();
+                    }
+
+                }
+                function showFortify() {
+                    if (!initGame) {
+                        alert("Cannot fortify before initial army placements!");
+                    } else {
+                        var fortifyWindow = document.getElementById("selectFortify");
+                        fortifyWindow.style.display = "inline";
+                        hideAttack();
+                    }
+                }
+                function hideFortify() {
+                    var fortifyWindow = document.getElementById("selectFortify");
+                    fortifyWindow.style.display = "none";
+                }
+                function hideAttack() {
+                    var attackWindow = document.getElementById("selectAttack");
+                    attackWindow.style.display = "none";
+                }
+                function fortifyFrom() {
+                    var fortifyingTerr = document.getElementById("reinforcingTerr");
+                    var territoryNum = document.getElementById("terr_number");
+                    fortifyingTerr.innerText = territoryNum.innerText;
+
+                    var reinforcee = document.getElementById('fortifyTo');
+                    reinforcee.style.display = "block";
+                }
+                function fortifyTo() {
+                    var fortifyingTerr = document.getElementById("reinforceeTerr");
+                    var territoryNum = document.getElementById("terr_number");
+                    fortifyingTerr.innerText = territoryNum.innerText;
+
+                    var input = document.getElementById("inputFort");
+                    input.style.display = "inline";
+                    var cancel = document.getElementById("cancelFort");
+                    cancel.style.display = "inline-block";
+
+                    var proceed = document.getElementById("proceedFort");
+                    proceed.style.display = "inline-block";
+                }
+                function cancelFortify() {
+                    document.getElementById("reinforcingTerr").innerText = "N/A";
+                    document.getElementById("reinforceeTerr").innerText = "N/A";
+                    document.getElementById("fortifyNum").value = 1;
+                    hideFortify();
+                }
+                function attackFrom() {
+                    var defending = document.getElementById("defending");
+                    defending.style.display= "block";
+
+                    var attackingTerr = document.getElementById("attackingTerr");
+                    var territoryNum = document.getElementById("terr_number");
+                    attackingTerr.innerText = territoryNum.innerText;
+                }
+                function attackTo() {
+                    var input = document.getElementById("input");
+                    input.style.display = "inline";
+                    var cancel = document.getElementById("cancel");
+                    cancel.style.display = "inline-block";
+
+                    var proceed = document.getElementById("proceed");
+                    proceed.style.display = "inline-block";
+
+                    var defendingTerr = document.getElementById("defendingTerr");
+                    var territoryNum = document.getElementById("terr_number");
+                    defendingTerr.innerText = territoryNum.innerText;
+                }
+                function cancelAttack() {
+                    document.getElementById("attackingTerr").innerText = "N/A";
+                    document.getElementById("defendingTerr").innerText = "N/A";
+                    document.getElementById("defending").style.display = "none";
+                    document.getElementById("input").style.display = "none";
+                    document.getElementById("cancel").style.display = "none";
+                    document.getElementById("proceed").style.display = "none";
+                    document.getElementById("selectAttack").style.display = "none";
+                    document.getElementById("cancel2").style.display = "none";
+                    document.getElementById("proceed2").style.display = "none";
+                    document.getElementById("attackRoll").style.display = "none";
+                    document.getElementById("defendRoll").style.display = "none";
+                }
+                var canFortify = true;
+                function fortify(reinforcer, reinforcee, fortCount) {
+                    if (canFortify == false) {
+                        alert("You may only fortify once each turn!");
+                    } else if (territoryMap.get(reinforcer)[1] != playerMap.get(currTurn % playerMap.size)[2]) {
+                        alert("You cannot fortify from a territory you do not own!");
+                    } else if (territoryMap.get(reinforcee)[1] != playerMap.get(currTurn % playerMap.size)[2]) {
+                        alert("You cannot fortify a territory you do not own!");
+                    } else if (reinforcee == reinforcer) {
+                        alert("The same territory cannot fortify itself!");
+                    } else if (fortCount > territoryMap.get(reinforcer)[0]) {
+                        alert("You cannot fortify using more armies than you have in a territory!");
+                    } else if (territoryMap.get(reinforcer)[0] - fortCount <= 0) {
+                        alert("You must leave at least one army in your territories at all times!");
+                    } else {
+                        canFortify = false;
+                        territoryMap.get(reinforcer)[0] -= fortCount;
+                        territoryMap.get(reinforcee)[0] += fortCount;
+                        alert(playerMap.get(currTurn % playerMap.size)[3] + " fortified territory #" +
+                            reinforcee + " with " + fortCount + " armies!");
+                    }
+                }
+                function attack(attacker, defender, atkDice, defDice) {
+                    var adjacentMap = new Map([
+                        @for(i <- 1 to 42) {
+                        [@i, [@for(j <- adjacentMap(i)) {
+                            @j,}]],
+                        }
+                    ]);
+                    console.log(adjacentMap);
+
+                    if (territoryMap.get(attacker)[1] != playerMap.get(currTurn % playerMap.size)[2]) {
+                        alert("You cannot attack from a territory you do not own!");
+                    } else if (attacker == defender) {
+                        alert("The same territory cannot attack itself!" +
+                                " Please select two different territories!");
+                    }  else if (territoryMap.get(attacker)[2] == territoryMap.get(defender)[2]) {
+                        alert("You cannot attack yourself! Select a territory you do not " +
+                                "own to attack.");
+                    } else if (atkDice > territoryMap.get(attacker)[0]) {
+                        alert("You cannot attack with more armies than " +
+                                "are currently in the territory!");
+                    } else if (defDice > territoryMap.get(defender)[0]) {
+                        alert("You cannot defend with more armies than " +
+                                "are currently in the territory!");
+                    } else if (atkDice == territoryMap.get(attacker)[0]) {
+                        alert("You must leave at least 1 army inside your territory before attacking!")
+                    } else if (adjacentMap.get(attacker).includes(defender)
+                            || adjacentMap.get(attacker).includes(defender)) {
+
+                        var attackerDice = [];
+                        var defenderDice = [];
+                        for (var i = 0; i < atkDice; i++) {
+                            var dice = rollDice();
+                            attackerDice.push(dice);
+                        }
+                        for (var j = 0; j < defDice; j++) {
+                            var dice = rollDice();
+                            defenderDice.push(dice);
+                        }
+                        document.getElementById("attackRoll").style.display = "inline-block";
+                        document.getElementById("defendRoll").style.display = "inline-block";
+
+                        attackerDice = attackerDice.sort();
+                        attackerDice = attackerDice.reverse();
+                        defenderDice = defenderDice.sort();
+                        defenderDice = defenderDice.reverse();
+                        document.getElementById("attackRollNum").innerText = "[" + attackerDice.toString() + "]";
+                        document.getElementById("defendRollNum").innerText = "[" + defenderDice.toString() + "]";
+
+                        var attackWin = 0;
+                        var defendWin = 0;
+                        console.log(attackerDice);
+                        console.log(defenderDice);
+
+                        for (var k = 0; k < Math.min(attackerDice.length, defenderDice.length); k++) {
+                            if (attackerDice[k] > defenderDice[k]) {
+                                territoryMap.get(defender)[0] -= 1;
+                                attackWin++;
+                            } else if (attackerDice[k] <= defenderDice[k]) {
+                                territoryMap.get(attacker)[0] -= 1;
+                                defendWin++;
+                            }
+                        }
+
+                        var victory = "The attack resulted in a draw.";
+                        if (attackWin > defendWin) {
+                            victory = territoryMap.get(attacker)[2] + " won the attack!";
+                            alert(victory);
+                        } else if (defendWin >= attackWin) {
+                            victory = territoryMap.get(defender)[2] + " successfully defended their territory!";
+                            alert(victory);
+                        }
+
+                        if (territoryMap.get(defender)[0] <= 0) {
+                            territoryMap.get(defender)[1] = territoryMap.get(attacker)[1];
+                            territoryMap.get(defender)[2] = territoryMap.get(attacker)[2];
+                            var occupyArmies = prompt(territoryMap.get(attacker)[2] + " conquered a territory!" +
+                                    " Enter the # of armies you wish to occupy this territory with: ", atkDice);
+                            while (occupyArmies < atkDice || occupyArmies >= territoryMap.get(attacker)[0]) {
+                                alert("You cannot occupy a territory with less armies than you attacked with, " +
+                                        "or the same number/more armies than you currently posses in a territory.");
+                                occupyArmies = prompt(territoryMap.get(attacker)[2] + " conquered a territory!" +
+                                        " Enter the # of armies you wish to occupy this territory with: ", atkDice);
+                            }
+                            territoryMap.get(defender)[0] += parseInt(occupyArmies);
+                            territoryMap.get(attacker)[0] -= parseInt(occupyArmies);
+                        } else {
+                           var cont = document.getElementById("proceed2");
+                           var canc = document.getElementById("cancel2");
+                           cont.style.display = "inline-block";
+                           canc.style.display = "inline-block";
+                        }
+
+                        reloadSpots();
+                    } else {
+                        alert("Those territories are not adjacent! " +
+                                "Please select two adjacent territories.");
+                    }
+                }
+
+                function rollDice() {
+                    return Math.floor(Math.random() * 6) + 1;
+                }
+
+                var territoryMap = new Map([
+                    @for(i <- 1 to 42) {
+                        [@i, [@territoryData(i).getUnits, @territoryData(i).getOwnerID, "@territoryData(i).getOwnerName"]],
+                    }
+                ]);
+
+                var playerMap = new Map([
+                    @for(i <- playerData.indices) {
+                        [@i, [@playerData(i)("turn"), @playerData(i)("numArmies"), @playerData(i)("id"), "@playerData(i)("name")"]],
+                    }
+                ]);
+
+                var turnMap = new Map([
+                    @for(i <- playerData.indices) {
+                    [@playerData(i)("id"), @playerData(i)("turn")],
+                    }
+                ]);
+
+                var initGame = false;
+
+                var initComplete = 0;
+
+                var currTurn = 0;
+                var subTurn = 0;
+
+                function getData(num) {
+                    var na = document.getElementById("num_armies");
+                    var owner = document.getElementById("owner");
+                    var terrNum = document.getElementById("terr_number");
+                    switch (num) {
+                        @for(i <- 1 to 42) {
+                        case @i: {
+                            owner.innerText = territoryMap.get(@i)[2] + ", ID: " + territoryMap.get(@i)[1];
+                            na.innerText = territoryMap.get(@i)[0];
+                            terrNum.innerText = @i;
+                            break;
+                        }
+                            }
+                        default:
+                            owner.innerText = "GT";
+                    }
+                }
+
+                function dispTurn() {
+                    var playerName = playerMap.get(currTurn % playerMap.size)[3];
+                    document.getElementById("turn").innerText = playerName;
+                    alert(playerName + "'s Turn!");
+                    for(var i = 1; i < 43; i++) {
+                        if(territoryMap.get(i)[1] == 1) {
+                            var num = i;
+                            var playerCol = '--player' + num.toString() + 'Color';
+                            document.documentElement.style.setProperty(playerCol, '#DF0000'); //red
+                        }   if(territoryMap.get(i)[1] == 2) {
+                            var num = i;
+                            var playerCol = '--player' + num.toString() + 'Color';
+                            document.documentElement.style.setProperty(playerCol, '#0000FF'); //blue
+                        }   if(territoryMap.get(i)[1] == 3) {
+                            var num = i;
+                            var playerCol = '--player' + num.toString() + 'Color';
+                            document.documentElement.style.setProperty(playerCol, '#008000'); //green
+                        }   if(territoryMap.get(i)[1] == 4) {
+                            var num = i;
+                            var playerCol = '--player' + num.toString() + 'Color';
+                            document.documentElement.style.setProperty(playerCol, '#FFCC00'); //yellow
+                        }   if(territoryMap.get(i)[1] == 5) {
+                            var num = i;
+                            var playerCol = '--player' + num.toString() + 'Color';
+                            document.documentElement.style.setProperty(playerCol, '#502d16'); //brown
+                        }   if(territoryMap.get(i)[1] == 6) {
+                            var num = i;
+                            var playerCol = '--player' + num.toString() + 'Color';
+                            document.documentElement.style.setProperty(playerCol, '#FF6600'); //orange
+                        }
+                    }
+                }
+
+                function addArmies(numArmy, territoryID) {
+                    var noTerritories = true;
+                    for (var j = 1; j < 43; j++) {
+                        if(territoryMap.get(j)[1] == playerMap.get(currTurn % playerMap.size)[2]) {
+                            noTerritories = false;
+                        }
+                    }
+                    if (noTerritories) {
+                        playerMap.get(currTurn % playerMap.size)[1] = 0;
+                        endTurn();
+                    }
+                    if (territoryMap.get(territoryID)[1] != playerMap.get(currTurn % playerMap.size)[2]) {
+                        alert("You cannot add armies to territories you do not own!");
+                    } else {
+                        if (!initGame) {
+                            if (territoryMap.get(territoryID)[1] == playerMap.get(currTurn % playerMap.size)[2]) {
+                                territoryMap.get(territoryID)[0] += numArmy;
+                                playerMap.get(currTurn % playerMap.size)[1] -= numArmy;
+                                subTurn++;
+                                if (playerMap.get(currTurn % playerMap.size)[1] == 0) {
+                                    initComplete++;
+                                    if (initComplete == playerMap.size) {
+                                        initGame = true;
+                                        document.getElementById("end-turn").style.display = "block";
+                                    } else {
+                                        currTurn++;
+                                        dispTurn();
+                                        subTurn = 0;
+                                    }
+                                } else if (subTurn == 3) {
+                                    currTurn++;
+                                    dispTurn();
+                                    subTurn = 0;
+                                }
+                                getData(territoryID);
+                                updateDispArmies();
+                            } else {
+                                alert("The selected territory does not belong to the current player.");
+                            }
+                        } else {
+                            if (territoryMap.get(territoryID)[1] == playerMap.get(currTurn % playerMap.size)[2]) {
+                                territoryMap.get(territoryID)[0] += numArmy;
+                                if (playerMap.get(currTurn % playerMap.size)[1] == 0) {
+                                    alert("You no longer have any more armies to add!");
+                                } else {
+                                    playerMap.get(currTurn % playerMap.size)[1] -= numArmy;
+                                    subTurn++;
+                                    if (playerMap.get(currTurn % playerMap.size)[1] == 0) {
+                                        document.getElementById("end-turn").style.display = "block";
+                                    }
+                                    getData(territoryID);
+                                    updateDispArmies();
+                                }
+                            } else {
+                                alert("The selected territory does not belong to the current player.");
+                            }
+
+                        }
+                    }
+                }
+
+                function updateDispArmies() {
+                    @for(i <- playerData.indices) {
+                    document.getElementById("player-data").rows[@(i+1)].cells[5].innerText = playerMap.get(@i)[1];
+                    }
+                }
+
+                function addNewArmies() {
+                    var REDBONUS = 5;
+                    var BROWNBONUS = 5;
+                    var BLUEBONUS = 5;
+                    var GREENBONUS = 5;
+                    var ORANGEBONUS = 5;
+                    var YELLOWBONUS = 5;
+
+                    var summaryMap = new Map([
+                        @for(i <- playerData.indices) {
+                            [@i, [0]],
+                        }
+                    ]);
+
+                    for(var i = 1; i <= 42; i++) {
+                        summaryMap.get(turnMap.get(territoryMap.get(i)[1]) - 1)[0] += 1;
+                    }
+
+                    for(var i = 0; i < playerMap.size; i++) {
+                        playerMap.get(i)[1] = (summaryMap.get(i)[0] > 2) ? Math.floor(summaryMap.get(i)[0] / 3) : 1;
+                    }
+                    updateDispArmies();
+                }
+
+                //For debugging purposes!
+                // function cheatWin() {
+                //     for (var j = 1; j < 43; j++) {
+                //         territoryMap.get(j)[1] = playerMap.get(1)[2];
+                //     }
+                //     reloadSpots();
+                // }
+                function endTurn() {
+                    var winner = true;
+                    for (var i = 1; i <= playerMap.size; i++) {
+                        for (var j = 1; j < 43; j++) {
+                            if (territoryMap.get(j)[1] != i) {
+                                winner = false;
+                            }
+                        }
+                        if (winner == true) {
+                            var playAgain = confirm(playerMap.get(i)[3] + " controls all territories! "
+                                    + playerMap.get(i)[3] + " wins! Play Again?");
+                            if(playAgain == true) {
+                                document.location.reload();
+                            } else {
+
+                            }
+                        }
+                        winner = true;
+                    }
+                    if ((currTurn + 1) % playerMap.size == 0) {
+                        addNewArmies();
+                        alert("New Armies Granted to Each Player");
+                    }
+                    currTurn++;
+                    dispTurn();
+                    canFortify = true;
+                    document.getElementById("end-turn").style.display = "none";
+                }
+
+                window.onload = dispTurn;
+
+            </script>
+            <script>
+                    function reloadSpots() {
+                        for(var i = 1; i < 43; i++) {
+                            if(territoryMap.get(i)[1] == 1) {
+                                var num = i;
+                                var playerCol = '--player' + num.toString() + 'Color';
+                                document.documentElement.style.setProperty(playerCol, '#DF0000'); //red
+                            }   if(territoryMap.get(i)[1] == 2) {
+                                var num = i;
+                                var playerCol = '--player' + num.toString() + 'Color';
+                                document.documentElement.style.setProperty(playerCol, '#0000FF'); //blue
+                            }   if(territoryMap.get(i)[1] == 3) {
+                                var num = i;
+                                var playerCol = '--player' + num.toString() + 'Color';
+                                document.documentElement.style.setProperty(playerCol, '#008000'); //green
+                            }   if(territoryMap.get(i)[1] == 4) {
+                                var num = i;
+                                var playerCol = '--player' + num.toString() + 'Color';
+                                document.documentElement.style.setProperty(playerCol, '#FFCC00'); //yellow
+                            }   if(territoryMap.get(i)[1] == 5) {
+                                var num = i;
+                                var playerCol = '--player' + num.toString() + 'Color';
+                                document.documentElement.style.setProperty(playerCol, '#502d16'); //brown
+                            }   if(territoryMap.get(i)[1] == 6) {
+                                var num = i;
+                                var playerCol = '--player' + num.toString() + 'Color';
+                                document.documentElement.style.setProperty(playerCol, '#FF6600'); //orange
+                            }
+                        }
+                    }
+            </script>
+        </body>
+    </html>
+}

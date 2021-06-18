@@ -1,0 +1,20 @@
+Soldier Types:
+1. Student: 
+2. TA: 
+3. Professor: 
+
+Territory: 
+
+Season System: 
+
+Turn Limit: 
+
+Attack rules:
+
+Player Colors:
+1.
+2.
+3.
+4.
+5.
+6. 

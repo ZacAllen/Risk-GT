@@ -1,0 +1,113 @@
+@(gForm: Form[models.GameData])(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@import views.html.helper._
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Login</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+            <!--===============================================================================================-->
+        <link rel="icon" type="image/png" href="@routes.Assets.versioned("static/log/images/icons/favicon.ico")"/>
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/vendor/bootstrap/css/bootstrap.min.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/fonts/font-awesome-4.7.0/css/font-awesome.min.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/fonts/iconic/css/material-design-iconic-font.min.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/vendor/animate/animate.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/vendor/css-hamburgers/hamburgers.min.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/vendor/animsition/css/animsition.min.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/vendor/select2/select2.min.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/vendor/daterangepicker/daterangepicker.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/css/util.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("static/log/css/main.css")">
+            <!--===============================================================================================-->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+            <!--===============================================================================================-->
+        <script type="text/javascript" src="http://gc.kis.v2.scr.kaspersky-labs.com/F140ED38-F233-A443-BAC2-0371FDF1CED7/main.js" charset="UTF-8"></script></head>
+    <body>
+
+        <div class="limiter">
+            <div class="container-login100" style="background-image: url('static/log/images/bg-01.jpg');">
+                <div class="wrap-login100">
+                @helper.form(action = routes.HomeController.gameInitiate(), 'class -> "login100-form validate-form") {
+                    @helper.CSRF.formField
+                    <span class="login100-form-logo">
+                        <i class="zmdi zmdi-landscape"></i>
+                    </span>
+
+                    <span class="login100-form-title p-b-34 p-t-27">
+                        Start New Game
+                    </span>
+                    <p>Please leave the name-email pair of field for player blank if the player is not available.<hr>This application is made for 3 - 6 players.</p>
+                    @if(gForm.hasGlobalErrors) {
+                        <ul>
+                        @for(error <- gForm.globalErrors) {
+                            <li>@error.format</li>
+                        }
+                        </ul>
+                    }
+                    @helper.inputText(gForm("name1"), 'class -> "input100", 'placeholder -> "Player 1 Name", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("email1"), 'class -> "input100", 'placeholder -> "Player 1 Email", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("name2"), 'class -> "input100", 'placeholder -> "Player 2 Name", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("email2"), 'class -> "input100", 'placeholder -> "Player 2 Email", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("name3"), 'class -> "input100", 'placeholder -> "Player 3 Name", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("email3"), 'class -> "input100", 'placeholder -> "Player 3 Email", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("name4"), 'class -> "input100", 'placeholder -> "Player 4 Name", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("email4"), 'class -> "input100", 'placeholder -> "Player 4 Email", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("name5"), 'class -> "input100", 'placeholder -> "Player 5 Name", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("email5"), 'class -> "input100", 'placeholder -> "Player 5 Email", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("name6"), 'class -> "input100", 'placeholder -> "Player 6 Name", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    @helper.inputText(gForm("email6"), 'class -> "input100", 'placeholder -> "Player 6 Email", '_label -> "")
+                    <span class="focus-input100" data-placeholder="&#xf15a;"></span>
+                    <div class="container-login100-form-btn">
+                        <button class="login100-form-btn" type="submit" id="submit" name="submit">
+                            Start Game!
+                        </button>
+                    </div>
+                }
+                </div>
+            </div>
+        </div>
+
+
+        <div id="dropDownSelect1"></div>
+
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/vendor/jquery/jquery-3.2.1.min.js")"></script>
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/vendor/animsition/js/animsition.min.js")"></script>
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/vendor/bootstrap/js/popper.js")"></script>
+        <script src="@routes.Assets.versioned("static/log/vendor/bootstrap/js/bootstrap.min.js")"></script>
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/vendor/select2/select2.min.js")"></script>
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/vendor/daterangepicker/moment.min.js")"></script>
+        <script src="@routes.Assets.versioned("static/log/vendor/daterangepicker/daterangepicker.js")"></script>
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/vendor/countdowntime/countdowntime.js")"></script>
+            <!--===============================================================================================-->
+        <script src="@routes.Assets.versioned("static/log/js/main.js")"></script>
+
+    </body>
+</html>

@@ -1,0 +1,29 @@
+@*
+* This template takes a single argument, a String containing a
+* message to display.
+*@
+@(message: String)
+    @*
+     * Get an `Html` object by calling the built-in Play welcome
+     * template and passing a `String` message.
+     *@
+
+    @*main("Welcome to Risk @ GT!") {*@
+        @*<form action = "@{game}" method = "GET">*@
+            @*<p>Play Game! <input type = "text" name = "placeholder"> </p>*@
+            @*<input type="submit" value="Start game!" />*@
+        @*</form>*@
+    @*}*@
+
+    * Call the `main` template with two arguments. The first
+    * argument is a `String` with the title of the page, the second
+    * argument is an `Html` object containing the body of the page.
+    *
+    @main("Welcome to Risk @ GT!") {
+        <form action = "@{
+            game
+        }" method = "GET">
+            <p>Play Game! <input type = "text" name = "placeholder"> </p>
+            <input type="submit" value="Start game!" />
+        </form>
+    }

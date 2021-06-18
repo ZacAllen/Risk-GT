@@ -1,0 +1,37 @@
+@(message: String, style: String = "scala")
+
+@defining(play.core.PlayVersion.current) { version =>
+
+<section id="top">
+  <div class="wrapper">
+    <h1><a href="https://playframework.com/documentation/@version/Home">@message</a></h1>
+  </div>
+</section>
+
+<div id="content" class="wrapper doc">
+<article>
+
+  <h1>Welcome to Risk</h1>
+
+  <p>
+    Congratulations, you’ve just created a new Risk application. This page will help you with the next few steps.
+  </p>
+
+  <blockquote>
+    <p>
+      You’re using Play @version
+    </p>
+  </blockquote>
+
+  <h2>Why do you see this page?</h2>
+
+    <p>
+      You are currently on the <code>server</code> side of the application. The <code>client</code> side of the
+          application is currently under development, but you may check at
+        <a href="http://risk.thinger.appspot.com/">http://risk.thinger.appspot.com/</a>.
+    </p>
+
+</article>
+
+</div>
+}
